@@ -1,3 +1,9 @@
+const STORAGE_KEYS = {
+    HABIT_PREFIX: 'habit_',
+    ACTIVITIES: 'habit_activities',
+    SELECTED_ACTIVITY: 'habit_selectedActivity'
+};
+
 let currentActivity = 'default';
 
 function isLeapYear(year) {
@@ -25,7 +31,7 @@ function getFirstDayOffset(year) {
 }
 
 function getStorageKey(activity, year, dayOfYear) {
-    return `habit_${activity}_${year}_${dayOfYear}`;
+    return `${STORAGE_KEYS.HABIT_PREFIX}${activity}_${year}_${dayOfYear}`;
 }
 
 function loadData(activity, year, dayOfYear) {
@@ -111,7 +117,7 @@ function initActivitySelect() {
     const activitySelect = document.getElementById('activitySelect');
     const addButton = document.getElementById('addActivity');
 
-    const savedActivities = JSON.parse(localStorage.getItem('activities') || '["default"]');
+    const savedActivities = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVITIES) || '["default"]');
 
     savedActivities.forEach(activity => {
         if (activity !== 'default') {
@@ -122,8 +128,15 @@ function initActivitySelect() {
         }
     });
 
+    const savedActivity = localStorage.getItem(STORAGE_KEYS.SELECTED_ACTIVITY);
+    if (savedActivity && savedActivities.includes(savedActivity)) {
+        activitySelect.value = savedActivity;
+        currentActivity = savedActivity;
+    }
+
     activitySelect.addEventListener('change', (e) => {
         currentActivity = e.target.value;
+        localStorage.setItem(STORAGE_KEYS.SELECTED_ACTIVITY, currentActivity);
         createCalendar(parseInt(document.getElementById('yearSelect').value));
     });
 
@@ -131,11 +144,11 @@ function initActivitySelect() {
         const newActivity = prompt('Enter new activity name:');
         if (newActivity && newActivity.trim()) {
             const trimmedActivity = newActivity.trim();
-            const activities = JSON.parse(localStorage.getItem('activities') || '["default"]');
+            const activities = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVITIES) || '["default"]');
 
             if (!activities.includes(trimmedActivity)) {
                 activities.push(trimmedActivity);
-                localStorage.setItem('activities', JSON.stringify(activities));
+                localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(activities));
 
                 const option = document.createElement('option');
                 option.value = trimmedActivity;
@@ -144,6 +157,7 @@ function initActivitySelect() {
 
                 activitySelect.value = trimmedActivity;
                 currentActivity = trimmedActivity;
+                localStorage.setItem(STORAGE_KEYS.SELECTED_ACTIVITY, currentActivity);
                 createCalendar(parseInt(document.getElementById('yearSelect').value));
             }
         }
