@@ -79,6 +79,15 @@ function createCalendar(year) {
             dayBox.classList.add('completed');
         }
 
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        if (year === currentYear) {
+            const todayDayOfYear = Math.floor((today - new Date(currentYear, 0, 0)) / (1000 * 60 * 60 * 24));
+            if (day === todayDayOfYear) {
+                dayBox.classList.add('today');
+            }
+        }
+
         dayBox.addEventListener('click', () => {
             const wasCompleted = dayBox.classList.contains('completed');
             if (wasCompleted) {

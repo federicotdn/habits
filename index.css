@@ -118,6 +118,17 @@ button {
     border-color: #4a7c4a;
 }
 
+.day-box.today::after {
+    content: '';
+    position: absolute;
+    top: 0.125rem;
+    right: 0.125rem;
+    width: 0;
+    height: 0;
+    border-left: 0.54rem solid transparent;
+    border-top: 0.54rem solid #e8e8e8;
+}
+
 @media (max-width: 600px) {
     .day-box {
         font-size: 12px;
