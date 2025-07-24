@@ -173,8 +173,86 @@ function initActivitySelect() {
     });
 }
 
+function exportData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith(STORAGE_KEYS.HABIT_PREFIX)) {
+            const value = localStorage.getItem(key);
+            if (value === 'true') {
+                const parts = key.replace(STORAGE_KEYS.HABIT_PREFIX, '').split('_');
+                const activity = parts[0];
+
+                if (activity === currentActivity) {
+                    const year = parts[1];
+                    const day = parts[2];
+                    if (!data[activity]) data[activity] = {};
+                    if (!data[activity][year]) data[activity][year] = [];
+
+                    data[activity][year].push(parseInt(day));
+                }
+            }
+        }
+    }
+    return JSON.stringify(data);
+}
+
+function importData(dataString) {
+    try {
+        const data = JSON.parse(dataString);
+
+        // Clear existing habit data
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(STORAGE_KEYS.HABIT_PREFIX)) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Import new data
+        for (const activity in data) {
+            for (const year in data[activity]) {
+                data[activity][year].forEach(day => {
+                    const key = getStorageKey(activity, year, day);
+                    localStorage.setItem(key, 'true');
+                });
+            }
+        }
+
+        // Refresh calendar
+        createCalendar(parseInt(document.getElementById('yearSelect').value));
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initYearSelect();
     initActivitySelect();
     createCalendar(new Date().getFullYear());
+
+    // Export/Import button listeners
+    document.getElementById('exportBtn').addEventListener('click', async () => {
+        const dataString = exportData();
+        try {
+            await navigator.clipboard.writeText(dataString);
+            alert(`Data for activity '${currentActivity}' exported to clipboard.`);
+        } catch (e) {
+            prompt('Data:', dataString);
+        }
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+        const dataString = prompt('WARNING: This may overwrite existing habit data across all years.\n\nPaste your export data here:');
+        if (dataString) {
+            if (importData(dataString)) {
+                alert('Data imported successfully.');
+            } else {
+                alert('Invalid data format. Import failed.');
+            }
+        }
+    });
 });

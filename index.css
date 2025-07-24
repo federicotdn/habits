@@ -12,17 +12,15 @@ body {
 .top-bar {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.875rem;
+    margin-bottom: 1.8rem;
     flex-wrap: wrap;
-    gap: 1.25rem;
+    gap: 2rem;
     max-width: 38rem;
 }
 
 .activity-section,
 .year-section {
     display: flex;
-    align-items: center;
     gap: 0.5rem;
 }
 
@@ -127,6 +125,12 @@ button {
     height: 0;
     border-left: 0.54rem solid transparent;
     border-top: 0.54rem solid #e8e8e8;
+}
+
+.footer {
+    margin-top: 1.8rem;
+    display: flex;
+    gap: 2rem;
 }
 
 @media (max-width: 600px) {
