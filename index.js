@@ -50,16 +50,16 @@ function getActivitiesData() {
 			};
 }
 
-function saveActivitiesData(data) {
+function setActivitiesData(data) {
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function loadData(activity, year, dayOfYear) {
+function getData(activity, year, dayOfYear) {
 	const data = getActivitiesData();
 	return data.activities[activity]?.[year]?.includes(dayOfYear) || false;
 }
 
-function saveData(activity, year, dayOfYear, completed) {
+function setData(activity, year, dayOfYear, completed) {
 	const data = getActivitiesData();
 
 	if (!data.activities[activity]) {
@@ -79,7 +79,7 @@ function saveData(activity, year, dayOfYear, completed) {
 		days.splice(index, 1);
 	}
 
-	saveActivitiesData(data);
+	setActivitiesData(data);
 }
 
 function createCalendar(year) {
@@ -124,7 +124,7 @@ function createCalendar(year) {
 			dayBox.appendChild(monthLabel);
 		}
 
-		if (loadData(currentActivity, year, day)) {
+		if (getData(currentActivity, year, day)) {
 			dayBox.classList.add("completed");
 		}
 
@@ -143,10 +143,10 @@ function createCalendar(year) {
 			const wasCompleted = dayBox.classList.contains("completed");
 			if (wasCompleted) {
 				dayBox.classList.remove("completed");
-				saveData(currentActivity, year, day, false);
+				setData(currentActivity, year, day, false);
 			} else {
 				dayBox.classList.add("completed");
-				saveData(currentActivity, year, day, true);
+				setData(currentActivity, year, day, true);
 			}
 		});
 
@@ -187,16 +187,14 @@ function initActivitySelect() {
 		}
 	});
 
-	if (data.selectedActivity && data.activities[data.selectedActivity]) {
-		activitySelect.value = data.selectedActivity;
-		currentActivity = data.selectedActivity;
-	}
+	activitySelect.value = data.selectedActivity;
+	currentActivity = data.selectedActivity;
 
 	activitySelect.addEventListener("change", (e) => {
 		currentActivity = e.target.value;
 		const data = getActivitiesData();
 		data.selectedActivity = currentActivity;
-		saveActivitiesData(data);
+		setActivitiesData(data);
 		createCalendar(parseInt(document.getElementById("yearSelect").value));
 	});
 
@@ -208,7 +206,6 @@ function initActivitySelect() {
 
 			if (!data.activities[trimmedActivity]) {
 				data.activities[trimmedActivity] = {};
-				saveActivitiesData(data);
 
 				const option = document.createElement("option");
 				option.value = trimmedActivity;
@@ -218,7 +215,9 @@ function initActivitySelect() {
 				activitySelect.value = trimmedActivity;
 				currentActivity = trimmedActivity;
 				data.selectedActivity = currentActivity;
-				saveActivitiesData(data);
+
+				setActivitiesData(data);
+
 				createCalendar(parseInt(document.getElementById("yearSelect").value));
 			}
 		}
@@ -247,7 +246,7 @@ function importData(dataString) {
 
 		const data = getActivitiesData();
 		Object.assign(data.activities, importedData);
-		saveActivitiesData(data);
+		setActivitiesData(data);
 
 		createCalendar(parseInt(document.getElementById("yearSelect").value));
 		return true;
