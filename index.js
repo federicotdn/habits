@@ -11,20 +11,7 @@ function isLeapYear(year) {
 }
 
 function getDateInfo(dayOfYear, year) {
-	const daysInMonth = [
-		31,
-		isLeapYear(year) ? 29 : 28,
-		31,
-		30,
-		31,
-		30,
-		31,
-		31,
-		30,
-		31,
-		30,
-		31,
-	];
+	const daysInMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 	let day = dayOfYear;
 	let month = 0;
 
@@ -49,6 +36,7 @@ function getActivitiesData() {
 		: {
 				selectedActivity: DEFAULT_ACTIVITY,
 				activities: { [DEFAULT_ACTIVITY]: {} },
+				version: VERSION,
 			};
 }
 
@@ -96,6 +84,7 @@ function createCalendar(year) {
 	}
 
 	const daysInYear = isLeapYear(year) ? 366 : 365;
+	const currentActivity = getCurrentActivity();
 
 	for (let day = 1; day <= daysInYear; day++) {
 		const dayBox = document.createElement("div");
@@ -126,7 +115,7 @@ function createCalendar(year) {
 			dayBox.appendChild(monthLabel);
 		}
 
-		if (getData(getCurrentActivity(), year, day)) {
+		if (getData(currentActivity, year, day)) {
 			dayBox.classList.add("completed");
 		}
 
@@ -225,12 +214,7 @@ function initActivitySelect() {
 }
 
 function exportData() {
-	const data = getActivitiesData();
-	const currentActivity = getCurrentActivity();
-	return JSON.stringify({
-		version: VERSION,
-		[currentActivity]: data.activities[currentActivity],
-	});
+	return JSON.stringify(getActivitiesData());
 }
 
 function importData(dataString) {
@@ -238,18 +222,12 @@ function importData(dataString) {
 		const importedData = JSON.parse(dataString);
 
 		if (importedData.version !== VERSION) {
-			throw new Error(
-				`Version mismatch: expected ${VERSION}, got ${importedData.version}`,
-			);
+			throw new Error(`Version mismatch: expected ${VERSION}, got ${importedData.version}`);
 		}
 
-		delete importedData.version;
-
-		const data = getActivitiesData();
-		Object.assign(data.activities, importedData);
-		setActivitiesData(data);
-
+		setActivitiesData(importedData);
 		createCalendar(parseInt(document.getElementById("yearSelect").value));
+
 		return true;
 	} catch (_e) {
 		return false;
@@ -268,9 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const dataString = exportData();
 		try {
 			await navigator.clipboard.writeText(dataString);
-			alert(
-				`Data for activity '${getCurrentActivity()}' exported to clipboard.`,
-			);
+			alert("Data exported to clipboard.");
 		} catch (_e) {
 			prompt("Data:", dataString);
 		}
@@ -278,11 +254,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	document.getElementById("importBtn").addEventListener("click", () => {
 		const dataString = prompt(
-			"WARNING: This may overwrite existing habit data across all years.\n\nPaste your export data here:",
+			"WARNING: This will overwrite data for all activities.\n\nPaste your export data here:",
 		);
 		if (dataString) {
 			if (importData(dataString)) {
 				alert("Data imported successfully.");
+				window.location.reload();
 			} else {
 				alert("Invalid data format. Import failed.");
 			}
