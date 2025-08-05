@@ -140,6 +140,17 @@ button {
 	font-size: 14px;
 }
 
+#deleteBtn {
+	background-color: #5d2c2c;
+	border-color: #6d3737;
+}
+
+@media (hover: hover) {
+	#deleteBtn:hover {
+		background-color: #6d3737;
+	}
+}
+
 @media (max-width: 600px) {
 	.day-box {
 		font-size: 12px;

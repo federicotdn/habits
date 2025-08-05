@@ -288,4 +288,35 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		}
 	});
+
+	document.getElementById("deleteBtn").addEventListener("click", () => {
+		const currentActivity = getCurrentActivity();
+
+		if (currentActivity === DEFAULT_ACTIVITY) {
+			alert("Cannot delete the default activity.");
+			return;
+		}
+
+		const confirmed = confirm(
+			`Are you sure? This will permanently delete all data for activity '${currentActivity}'.`
+		);
+
+		if (confirmed) {
+			const data = getActivitiesData();
+			delete data.activities[currentActivity];
+			data.selectedActivity = DEFAULT_ACTIVITY;
+			setActivitiesData(data);
+
+			const activitySelect = document.getElementById("activitySelect");
+			activitySelect.value = DEFAULT_ACTIVITY;
+
+			Array.from(activitySelect.options).forEach(option => {
+				if (option.value === currentActivity) {
+					option.remove();
+				}
+			});
+
+			createCalendar(parseInt(document.getElementById("yearSelect").value));
+		}
+	});
 });
