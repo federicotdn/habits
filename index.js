@@ -1,5 +1,6 @@
 const STORAGE_KEY = "activities";
 const DEFAULT_ACTIVITY = "default";
+const VERSION = "v1";
 
 let currentActivity = DEFAULT_ACTIVITY;
 
@@ -227,6 +228,7 @@ function initActivitySelect() {
 function exportData() {
 	const data = getActivitiesData();
 	return JSON.stringify({
+		version: VERSION,
 		[currentActivity]: data.activities[currentActivity],
 	});
 }
@@ -234,8 +236,16 @@ function exportData() {
 function importData(dataString) {
 	try {
 		const importedData = JSON.parse(dataString);
-		const data = getActivitiesData();
 
+		if (importedData.version !== VERSION) {
+			throw new Error(
+				`Version mismatch: expected ${VERSION}, got ${importedData.version}`,
+			);
+		}
+
+		delete importedData.version;
+
+		const data = getActivitiesData();
 		Object.assign(data.activities, importedData);
 		saveActivitiesData(data);
 
@@ -250,6 +260,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	initYearSelect();
 	initActivitySelect();
 	createCalendar(new Date().getFullYear());
+
+	document.getElementById("version").textContent = VERSION;
 
 	// Export/Import button listeners
 	document.getElementById("exportBtn").addEventListener("click", async () => {

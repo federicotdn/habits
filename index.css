@@ -131,7 +131,13 @@ button {
 .footer {
 	margin-top: 1.8rem;
 	display: flex;
+	align-items: center;
 	gap: 2rem;
+}
+
+#version {
+	color: #b0b0b0;
+	font-size: 14px;
 }
 
 @media (max-width: 600px) {
