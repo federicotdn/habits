@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		const confirmed = confirm(
-			`Are you sure? This will permanently delete all data for activity '${currentActivity}'.`
+			`Are you sure? This will permanently delete all data for activity '${currentActivity}'.`,
 		);
 
 		if (confirmed) {
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			const activitySelect = document.getElementById("activitySelect");
 			activitySelect.value = DEFAULT_ACTIVITY;
 
-			Array.from(activitySelect.options).forEach(option => {
+			Array.from(activitySelect.options).forEach((option) => {
 				if (option.value === currentActivity) {
 					option.remove();
 				}
