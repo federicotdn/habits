@@ -2,7 +2,9 @@ const STORAGE_KEY = "activities";
 const DEFAULT_ACTIVITY = "default";
 const VERSION = "v1";
 
-let currentActivity = DEFAULT_ACTIVITY;
+function getCurrentActivity() {
+	return getActivitiesData().selectedActivity;
+}
 
 function isLeapYear(year) {
 	return new Date(year, 1, 29).getDate() === 29;
@@ -124,7 +126,7 @@ function createCalendar(year) {
 			dayBox.appendChild(monthLabel);
 		}
 
-		if (getData(currentActivity, year, day)) {
+		if (getData(getCurrentActivity(), year, day)) {
 			dayBox.classList.add("completed");
 		}
 
@@ -141,12 +143,13 @@ function createCalendar(year) {
 
 		dayBox.addEventListener("click", () => {
 			const wasCompleted = dayBox.classList.contains("completed");
+			const activity = getCurrentActivity();
 			if (wasCompleted) {
 				dayBox.classList.remove("completed");
-				setData(currentActivity, year, day, false);
+				setData(activity, year, day, false);
 			} else {
 				dayBox.classList.add("completed");
-				setData(currentActivity, year, day, true);
+				setData(activity, year, day, true);
 			}
 		});
 
@@ -188,12 +191,10 @@ function initActivitySelect() {
 	});
 
 	activitySelect.value = data.selectedActivity;
-	currentActivity = data.selectedActivity;
 
 	activitySelect.addEventListener("change", (e) => {
-		currentActivity = e.target.value;
 		const data = getActivitiesData();
-		data.selectedActivity = currentActivity;
+		data.selectedActivity = e.target.value;
 		setActivitiesData(data);
 		createCalendar(parseInt(document.getElementById("yearSelect").value));
 	});
@@ -213,8 +214,7 @@ function initActivitySelect() {
 				activitySelect.appendChild(option);
 
 				activitySelect.value = trimmedActivity;
-				currentActivity = trimmedActivity;
-				data.selectedActivity = currentActivity;
+				data.selectedActivity = trimmedActivity;
 
 				setActivitiesData(data);
 
@@ -226,6 +226,7 @@ function initActivitySelect() {
 
 function exportData() {
 	const data = getActivitiesData();
+	const currentActivity = getCurrentActivity();
 	return JSON.stringify({
 		version: VERSION,
 		[currentActivity]: data.activities[currentActivity],
@@ -267,7 +268,9 @@ document.addEventListener("DOMContentLoaded", () => {
 		const dataString = exportData();
 		try {
 			await navigator.clipboard.writeText(dataString);
-			alert(`Data for activity '${currentActivity}' exported to clipboard.`);
+			alert(
+				`Data for activity '${getCurrentActivity()}' exported to clipboard.`,
+			);
 		} catch (_e) {
 			prompt("Data:", dataString);
 		}
