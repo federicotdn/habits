@@ -93,7 +93,7 @@ button {
 .day-box.month-7,
 .day-box.month-9,
 .day-box.month-11 {
-	background-color: #3f3f3f;
+	background-color: #4a4a4a;
 }
 
 .day-box.month-2,
@@ -102,7 +102,7 @@ button {
 .day-box.month-8,
 .day-box.month-10,
 .day-box.month-12 {
-	background-color: #323232;
+	background-color: #333333;
 }
 
 .day-box.empty {
