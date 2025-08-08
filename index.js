@@ -10,8 +10,12 @@ function isLeapYear(year) {
 	return new Date(year, 1, 29).getDate() === 29;
 }
 
+function getDaysInMonth(year) {
+	return [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+}
+
 function getDateInfo(dayOfYear, year) {
-	const daysInMonth = [31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+	const daysInMonth = getDaysInMonth(year);
 	let day = dayOfYear;
 	let month = 0;
 
@@ -122,9 +126,16 @@ function createCalendar(year) {
 		const today = new Date();
 		const currentYear = today.getFullYear();
 		if (year === currentYear) {
-			const todayDayOfYear = Math.floor(
-				(today - new Date(currentYear, 0, 0)) / (1000 * 60 * 60 * 24),
-			);
+			const currentMonth = today.getMonth() + 1;
+			const currentDay = today.getDate();
+
+			// Calculate day of year manually to avoid timezone issues
+			const daysInMonth = getDaysInMonth(currentYear);
+			let todayDayOfYear = currentDay;
+			for (let i = 0; i < currentMonth - 1; i++) {
+				todayDayOfYear += daysInMonth[i];
+			}
+
 			if (day === todayDayOfYear) {
 				dayBox.classList.add("today");
 			}
