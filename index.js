@@ -50,11 +50,22 @@ function setActivitiesData(data) {
 
 function getData(activity, year, dayOfYear) {
 	const data = getActivitiesData();
-	return data.activities[activity]?.[year]?.includes(dayOfYear) || false;
+	const halfKey = `${year}_half`;
+
+	// Check half-completed first (takes priority)
+	if (data.activities[activity]?.[halfKey]?.includes(dayOfYear)) {
+		return "half";
+	}
+	// Then check fully completed
+	if (data.activities[activity]?.[year]?.includes(dayOfYear)) {
+		return "full";
+	}
+	return null;
 }
 
-function setData(activity, year, dayOfYear, completed) {
+function setData(activity, year, dayOfYear, state) {
 	const data = getActivitiesData();
+	const halfKey = `${year}_half`;
 
 	if (!data.activities[activity]) {
 		data.activities[activity] = {};
@@ -62,15 +73,31 @@ function setData(activity, year, dayOfYear, completed) {
 	if (!data.activities[activity][year]) {
 		data.activities[activity][year] = [];
 	}
+	if (!data.activities[activity][halfKey]) {
+		data.activities[activity][halfKey] = [];
+	}
 
-	const days = data.activities[activity][year];
-	const index = days.indexOf(dayOfYear);
+	const fullDays = data.activities[activity][year];
+	const halfDays = data.activities[activity][halfKey];
 
-	if (completed && index === -1) {
-		days.push(dayOfYear);
-		days.sort((a, b) => a - b);
-	} else if (!completed && index !== -1) {
-		days.splice(index, 1);
+	const fullIndex = fullDays.indexOf(dayOfYear);
+	const halfIndex = halfDays.indexOf(dayOfYear);
+
+	// Remove from both arrays first
+	if (fullIndex !== -1) {
+		fullDays.splice(fullIndex, 1);
+	}
+	if (halfIndex !== -1) {
+		halfDays.splice(halfIndex, 1);
+	}
+
+	// Add to appropriate array based on state
+	if (state === "full") {
+		fullDays.push(dayOfYear);
+		fullDays.sort((a, b) => a - b);
+	} else if (state === "half") {
+		halfDays.push(dayOfYear);
+		halfDays.sort((a, b) => a - b);
 	}
 
 	setActivitiesData(data);
@@ -119,8 +146,11 @@ function createCalendar(year) {
 			dayBox.appendChild(monthLabel);
 		}
 
-		if (getData(currentActivity, year, day)) {
+		const dayState = getData(currentActivity, year, day);
+		if (dayState === "full") {
 			dayBox.classList.add("completed");
+		} else if (dayState === "half") {
+			dayBox.classList.add("half-completed");
 		}
 
 		const today = new Date();
@@ -142,14 +172,22 @@ function createCalendar(year) {
 		}
 
 		dayBox.addEventListener("click", () => {
-			const wasCompleted = dayBox.classList.contains("completed");
 			const activity = getCurrentActivity();
-			if (wasCompleted) {
-				dayBox.classList.remove("completed");
-				setData(activity, year, day, false);
-			} else {
+			const currentState = getData(activity, year, day);
+
+			// State cycle: null -> full -> half -> null
+			if (currentState === null) {
+				dayBox.classList.remove("half-completed");
 				dayBox.classList.add("completed");
-				setData(activity, year, day, true);
+				setData(activity, year, day, "full");
+			} else if (currentState === "full") {
+				dayBox.classList.remove("completed");
+				dayBox.classList.add("half-completed");
+				setData(activity, year, day, "half");
+			} else if (currentState === "half") {
+				dayBox.classList.remove("half-completed");
+				dayBox.classList.remove("completed");
+				setData(activity, year, day, "none");
 			}
 		});
 

@@ -117,6 +117,12 @@ button {
 	border-color: #4a7c4a;
 }
 
+.day-box.half-completed {
+	background-color: #3a5a70;
+	color: #a0d8f0;
+	border: 2px dashed #5a8fb0;
+}
+
 .day-box.today::after {
 	content: "";
 	position: absolute;
